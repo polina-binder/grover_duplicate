@@ -33,17 +33,19 @@ class GROVEREmbedding(nn.Module):
             args.backbone = "gtrans"
         if args.backbone == "gtrans" or args.backbone == "dualtrans":
             # dualtrans is the old name.
+            if not hasattr(args, "dropout"):
+                args.dropout = 0
             self.encoders = GTransEncoder(args,
-                                          hidden_size=args.hidden_size,
+                                          hidden_size=args.ffn_hidden_size,
                                           edge_fdim=edge_dim,
                                           node_fdim=node_dim,
                                           dropout=args.dropout,
                                           activation=args.activation,
-                                          num_mt_block=args.num_mt_block,
-                                          num_attn_head=args.num_attn_head,
+                                          #num_mt_block=args.num_mt_block,
+                                          #num_attn_head=args.num_attn_head,
                                           atom_emb_output=self.embedding_output_type,
-                                          bias=args.bias,
-                                          cuda=args.cuda)
+                                          #bias=args.bias,
+                                          cuda=None)#args.cuda)
 
     def forward(self, graph_batch: List) -> Dict:
         """
@@ -368,7 +370,7 @@ class GroverFinetuneTask(nn.Module):
     def __init__(self, args):
         super(GroverFinetuneTask, self).__init__()
 
-        self.hidden_size = args.hidden_size
+        self.hidden_size = args.ffn_hidden_size
         self.iscuda = args.cuda
 
         self.grover = GROVEREmbedding(args)
@@ -401,12 +403,12 @@ class GroverFinetuneTask(nn.Module):
             first_linear_dim = args.features_size + args.features_dim
         else:
             if args.self_attention:
-                first_linear_dim = args.hidden_size * args.attn_out
+                first_linear_dim = args.ffn_hidden_size * args.attn_out
                 # TODO: Ad-hoc!
                 # if args.use_input_features:
                 first_linear_dim += args.features_dim
             else:
-                first_linear_dim = args.hidden_size + args.features_dim
+                first_linear_dim = args.ffn_hidden_size + args.features_dim
 
         dropout = nn.Dropout(args.dropout)
         activation = get_activation_function(args.activation)

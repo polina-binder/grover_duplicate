@@ -118,6 +118,7 @@ def run_training(args: Namespace, time_start, logger: Logger = None) -> List[flo
 
     # pin GPU to local rank.
     idx = args.gpu
+    args.gpu = None
     if args.gpu is not None:
         torch.cuda.set_device(idx)
 

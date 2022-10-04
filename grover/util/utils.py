@@ -128,6 +128,7 @@ def filter_invalid_smiles(data: MoleculeDataset) -> MoleculeDataset:
         if datapoint.smiles == '':
             print(f'invalid smiles {idx}: {datapoint.smiles}')
             continue
+        
         mol = Chem.MolFromSmiles(datapoint.smiles)
         if mol.GetNumHeavyAtoms() == 0:
             print(f'invalid heavy {idx}')
@@ -212,6 +213,7 @@ def get_data(path: str,
     # Filter out invalid SMILES
     if skip_invalid_smiles:
         original_data_len = len(data)
+    
         data = filter_invalid_smiles(data)
 
         if len(data) < original_data_len:
